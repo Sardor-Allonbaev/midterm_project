@@ -4,31 +4,31 @@ import random
 
 class Square:
 
-    def __init__(self, coords, length, size, state=False, active_col='black', inactive_col='white'):
+    def __init__(self, coords, lengths, sizes, state=False, active_col='red', inactive_col='grey'):
 
-        self.length = length                   
+        self.length = lengths                   
         self.coords = coords                   
-        self.size = size                       
+        self.size = sizes                       
         self.state = state                     
         self.active_colour = active_col        
         self.inactive_colour = inactive_col    
 
     def rect(self):
-        return (self.coords[0]+self.size, self.coords[1]+self.size)
+        self (self.coords[0]+self.size, self.coords[1]+self.size)
 
-    def inbounds(self, coord):
+    def entering(self, coord):
         (x, y) = coord
         return (x >= 0 and x <= self.length-self.size) and (y >= 0 and y <= self.length-self.size)
 
     def neighbours(self):
         (x, y) = self.coords
-        return list(filter(self.inbounds, [
+        return list(filter(self.entering, [
                     (x-self.size, y+self.size), (x, y+self.size), (x+self.size, y+self.size),
                     (x-self.size, y),                                      (x+self.size, y),
                     (x-self.size, y-self.size), (x, y-self.size), (x+self.size, y-self.size),
                 ]))
 
-    def get_colour(self):
+    def take_colour(self):
         return self.active_colour if self.state else self.inactive_colour
 
 
@@ -92,21 +92,21 @@ class Grid:
 
 
 class App:
-    def __init__(self, length, size, tolerance=0.8):
+    def __init__(self, lengths, sizes, tolerance=10):
 
-        self.length = length  
-        self.size = size      
+        self.lengths = lengths  
+        self.sizes = sizes      
 
-        if not self.length % self.size == 0:
+        if not self.lengths % self.sizes == 0:
             raise Exception("Make square bidder please." +
                             "My dear make it to the full screen.")
 
-        self.grid = Grid(self.length, self.size, tolerance, active_col='red', inactive_col = 'grey')
+        self.grid = Grid(self.lengths, self.sizes, tolerance, active_col='red', inactive_col = 'grey')
 
         
         self.root = Tk()
 
-        self.canvas = Canvas(self.root, height=self.length, width=self.length)
+        self.canvas = Canvas(self.root, height=self.lengths, width=self.lengths)
         self.canvas.pack()
         self.items = self.update_canvas()
         self.root.after(5, self.refresh_screen)
@@ -128,16 +128,16 @@ class App:
                 (b_r_x, b_r_y) = square.rect()  
                 (t_l_x, t_l_y) = coords         
 
-                canvas_items[coords] = self.canvas.create_rectangle(t_l_x, t_l_y, b_r_x, b_r_y, fill=square.get_colour())
+                canvas_items[coords] = self.canvas.create_rectangle(t_l_x, t_l_y, b_r_x, b_r_y, fill=square.take_colour())
             return canvas_items
 
         else:
             if canvas_items:
                 for coords, item in canvas_items.items():
-                    self.canvas.itemconfig(item, fill=square_items[coords].get_colour())
+                    self.canvas.itemconfig(item, fill=square_items[coords].take_colour())
             else:
                 raise ValueError("There is not given canvas_items given for reiterating over canvas squares.")
 
 
 if __name__ == '__main__':
-    app = App(1000, 25, tolerance=0.7)
+    app = App(1000, 20, tolerance=0.8)
